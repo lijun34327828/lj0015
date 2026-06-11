@@ -1,0 +1,63 @@
+{
+  "generate": [
+    {
+      "id": "1781109612248-8mj06r",
+      "timestamp": 1781109612248,
+      "type": "qrcode",
+      "content": "https://github.com/barcode-master",
+      "size": 300,
+      "errorLevel": "M",
+      "bgColor": "#FFFFFF",
+      "fgColor": "#000000",
+      "fileName": "qr_1781109612247_qndj7m.png"
+    },
+    {
+      "id": "1781109352915-wd1lpb",
+      "timestamp": 1781109352915,
+      "type": "qrcode",
+      "content": "Hello3",
+      "batch": true,
+      "fileName": "batch_1781109352913_2_Hello3.png"
+    },
+    {
+      "id": "1781109352905-1dnurp",
+      "timestamp": 1781109352905,
+      "type": "qrcode",
+      "content": "Hello2",
+      "batch": true,
+      "fileName": "batch_1781109352904_1_Hello2.png"
+    },
+    {
+      "id": "1781109352897-fsdff3",
+      "timestamp": 1781109352897,
+      "type": "qrcode",
+      "content": "Hello1",
+      "batch": true,
+      "fileName": "batch_1781109352895_0_Hello1.png"
+    },
+    {
+      "id": "1781109340391-lfmcgk",
+      "timestamp": 1781109340391,
+      "type": "code128",
+      "content": "ABC123456789",
+      "width": 2,
+      "height": 100,
+      "bgColor": "#FFFFFF",
+      "fgColor": "#000000",
+      "includeText": true,
+      "fileName": "bar_1781109340390_yvvtzk.png"
+    },
+    {
+      "id": "1781109319954-oe5gcq",
+      "timestamp": 1781109319954,
+      "type": "qrcode",
+      "content": "https://example.com",
+      "size": 300,
+      "errorLevel": "M",
+      "bgColor": "#FFFFFF",
+      "fgColor": "#000000",
+      "fileName": "qr_1781109319319_gg2z7e.png"
+    }
+  ],
+  "decode": []
+}

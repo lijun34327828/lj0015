@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>条码综合工具 | Barcode Master</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg viewBox="0 0 32 32" width="36" height="36" fill="none">
+          <rect x="4" y="8" width="3" height="16" fill="currentColor"/>
+          <rect x="9" y="8" width="2" height="16" fill="currentColor" opacity="0.6"/>
+          <rect x="13" y="8" width="4" height="16" fill="currentColor"/>
+          <rect x="19" y="8" width="2" height="16" fill="currentColor" opacity="0.6"/>
+          <rect x="23" y="8" width="3" height="16" fill="currentColor"/>
+          <rect x="9" y="12" width="14" height="8" rx="1" fill="currentColor" opacity="0.15"/>
+        </svg>
+        <div>
+          <h1>Barcode Master</h1>
+          <p>条码综合工具 · 编码解码一体化</p>
+        </div>
+      </div>
+      <nav class="tabs">
+        <button class="tab active" data-tab="generate">
+          <span class="tab-icon">◆</span>生成
+        </button>
+        <button class="tab" data-tab="decode">
+          <span class="tab-icon">◇</span>解析
+        </button>
+        <button class="tab" data-tab="batch">
+          <span class="tab-icon">▦</span>批量
+        </button>
+        <button class="tab" data-tab="history">
+          <span class="tab-icon">☰</span>历史
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="tab-generate" class="tab-panel active">
+      <div class="panel-split">
+        <div class="panel-left">
+          <div class="card">
+            <div class="card-header">
+              <h2>条码类型</h2>
+            </div>
+            <div class="card-body">
+              <div class="type-switcher">
+                <button class="type-btn active" data-code-type="qrcode">
+                  <svg viewBox="0 0 48 48" width="28" height="28">
+                    <rect x="6" y="6" width="12" height="12" fill="currentColor"/>
+                    <rect x="8" y="8" width="8" height="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <rect x="10" y="10" width="4" height="4" fill="currentColor"/>
+                    <rect x="30" y="6" width="12" height="12" fill="currentColor"/>
+                    <rect x="32" y="8" width="8" height="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <rect x="34" y="10" width="4" height="4" fill="currentColor"/>
+                    <rect x="6" y="30" width="12" height="12" fill="currentColor"/>
+                    <rect x="8" y="32" width="8" height="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <rect x="10" y="34" width="4" height="4" fill="currentColor"/>
+                    <rect x="22" y="10" width="4" height="4" fill="currentColor"/>
+                    <rect x="30" y="22" width="4" height="4" fill="currentColor"/>
+                    <rect x="22" y="22" width="4" height="4" fill="currentColor"/>
+                    <rect x="30" y="30" width="4" height="4" fill="currentColor"/>
+                    <rect x="38" y="30" width="4" height="4" fill="currentColor"/>
+                    <rect x="22" y="38" width="12" height="4" fill="currentColor"/>
+                    <rect x="38" y="38" width="4" height="4" fill="currentColor"/>
+                  </svg>
+                  <span>二维码</span>
+                </button>
+                <button class="type-btn" data-code-type="barcode">
+                  <svg viewBox="0 0 48 48" width="28" height="28" fill="currentColor">
+                    <rect x="6" y="12" width="3" height="24"/>
+                    <rect x="11" y="12" width="2" height="24"/>
+                    <rect x="15" y="12" width="4" height="24"/>
+                    <rect x="21" y="12" width="2" height="24"/>
+                    <rect x="25" y="12" width="3" height="24"/>
+                    <rect x="30" y="12" width="2" height="24"/>
+                    <rect x="34" y="12" width="4" height="24"/>
+                    <rect x="40" y="12" width="2" height="24"/>
+                  </svg>
+                  <span>一维条码</span>
+                </button>
+              </div>
+
+              <div id="barcode-type-select" class="form-row" style="display:none;margin-top:16px;">
+                <label>条码格式</label>
+                <select id="barcodeFormat">
+                  <option value="code128">Code 128 (通用)</option>
+                  <option value="code39">Code 39</option>
+                  <option value="ean13">EAN-13</option>
+                  <option value="ean8">EAN-8</option>
+                  <option value="upca">UPC-A</option>
+                  <option value="upce">UPC-E</option>
+                  <option value="itf14">ITF-14</option>
+                  <option value="codabar">Codabar</option>
+                  <option value="msi">MSI Plessey</option>
+                  <option value="datamatrix">Data Matrix</option>
+                  <option value="pdf417">PDF417</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>内容与参数</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <label>条码内容 <span class="required">*</span></label>
+                <textarea id="contentInput" rows="3" placeholder="输入要生成条码的内容（URL、文本、数据等）"></textarea>
+                <div class="hint"><span id="contentCount">0</span> / 4000 字符</div>
+                <div class="error-msg" id="contentError"></div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>尺寸（像素）</label>
+                  <input type="number" id="sizeInput" value="300" min="50" max="2000">
+                  <div class="error-msg" id="sizeError"></div>
+                </div>
+                <div id="heightRow" class="form-row" style="display:none;">
+                  <label>高度（像素）</label>
+                  <input type="number" id="heightInput" value="100" min="30" max="500">
+                </div>
+                <div class="form-row">
+                  <label id="errorLabel">纠错等级</label>
+                  <select id="errorLevel">
+                    <option value="L">L - 低 (7%)</option>
+                    <option value="M" selected>M - 中 (15%)</option>
+                    <option value="Q">Q - 较高 (25%)</option>
+                    <option value="H">H - 高 (30%)</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label>边距</label>
+                  <input type="number" id="marginInput" value="2" min="0" max="50">
+                </div>
+                <div class="form-row">
+                  <label>前景色</label>
+                  <div class="color-picker">
+                    <input type="color" id="fgColor" value="#000000">
+                    <input type="text" id="fgColorText" value="#000000" maxlength="7">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <label>背景色</label>
+                  <div class="color-picker">
+                    <input type="color" id="bgColor" value="#FFFFFF">
+                    <input type="text" id="bgColorText" value="#FFFFFF" maxlength="7">
+                  </div>
+                </div>
+                <div id="includeTextRow" class="form-row" style="display:none;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="includeText" checked>
+                    <span>显示底部文字</span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="logoSection" class="form-row">
+                <label>嵌入LOGO (二维码)</label>
+                <div class="logo-uploader" id="logoUploader">
+                  <input type="file" id="logoFile" accept="image/*" hidden>
+                  <div class="logo-preview" id="logoPreview">
+                    <div class="logo-placeholder">
+                      <svg viewBox="0 0 48 48" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="8" y="8" width="32" height="32" rx="4"/>
+                        <circle cx="18" cy="18" r="4" fill="currentColor" opacity="0.3"/>
+                        <path d="M8 34 L18 24 L28 34 L32 30 L40 38"/>
+                      </svg>
+                      <span>点击上传LOGO图片</span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-ghost" id="clearLogo" style="display:none;">移除LOGO</button>
+                </div>
+              </div>
+
+              <button class="btn-primary btn-lg" id="generateBtn">
+                <span id="generateBtnText">生成条码</span>
+                <span id="generateSpinner" class="spinner" style="display:none;"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-right">
+          <div class="card sticky">
+            <div class="card-header">
+              <h2>实时预览</h2>
+              <div class="header-actions">
+                <button class="btn-ghost btn-sm" id="copyContent" title="复制内容">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                  复制
+                </button>
+                <button class="btn-ghost btn-sm" id="downloadBtn" title="下载图片">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  下载
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="preview-container" id="previewContainer">
+                <div class="preview-placeholder" id="previewPlaceholder">
+                  <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="8" y="8" width="48" height="48" rx="4"/>
+                    <rect x="14" y="14" width="12" height="12"/>
+                    <rect x="16" y="16" width="8" height="8" fill="none"/>
+                    <rect x="18" y="18" width="4" height="4" fill="currentColor"/>
+                    <rect x="38" y="14" width="12" height="12"/>
+                    <rect x="40" y="16" width="8" height="8" fill="none"/>
+                    <rect x="42" y="18" width="4" height="4" fill="currentColor"/>
+                    <rect x="14" y="38" width="12" height="12"/>
+                    <rect x="16" y="40" width="8" height="8" fill="none"/>
+                    <rect x="18" y="42" width="4" height="4" fill="currentColor"/>
+                    <rect x="30" y="22" width="4" height="4" fill="currentColor"/>
+                    <rect x="38" y="30" width="4" height="4" fill="currentColor"/>
+                    <rect x="30" y="30" width="4" height="4" fill="currentColor"/>
+                    <rect x="46" y="38" width="4" height="4" fill="currentColor"/>
+                    <rect x="30" y="46" width="16" height="4" fill="currentColor"/>
+                  </svg>
+                  <p>条码预览区</p>
+                  <span>配置参数后点击生成</span>
+                </div>
+                <img id="previewImage" style="display:none;" alt="条码预览">
+              </div>
+
+              <div class="preview-info" id="previewInfo" style="display:none;">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-label">内容</span>
+                    <span class="info-value" id="infoContent">-</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">类型</span>
+                    <span class="info-value" id="infoType">-</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">尺寸</span>
+                    <span class="info-value" id="infoSize">-</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">时间</span>
+                    <span class="info-value" id="infoTime">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-decode" class="tab-panel">
+      <div class="panel-split">
+        <div class="panel-left">
+          <div class="card">
+            <div class="card-header">
+              <h2>上传图片</h2>
+            </div>
+            <div class="card-body">
+              <div class="upload-area" id="decodeUploader">
+                <input type="file" id="decodeFile" accept="image/*" hidden>
+                <div class="upload-inner">
+                  <div class="upload-icon">
+                    <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M32 44V20"/>
+                      <polyline points="20 32 32 20 44 32"/>
+                      <rect x="8" y="8" width="48" height="48" rx="6"/>
+                      <path d="M8 52 L20 40 L28 48 L36 40 L48 52"/>
+                      <circle cx="22" cy="24" r="3" fill="currentColor" opacity="0.3"/>
+                    </svg>
+                  </div>
+                  <h3>拖拽图片到此处，或点击上传</h3>
+                  <p>支持 JPG、PNG、BMP、WEBP 等格式</p>
+                  <p class="upload-tip">自动识别二维码和一维条码，支持模糊、倾斜图像预处理</p>
+                </div>
+              </div>
+
+              <div class="action-row">
+                <button class="btn-secondary" id="screenshotBtn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                  截取屏幕
+                </button>
+                <button class="btn-secondary" id="pasteBtn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                  粘贴剪贴板
+                </button>
+              </div>
+
+              <div class="image-preview-wrap" id="decodeImagePreview" style="display:none;">
+                <div class="image-preview-title">
+                  <span>待识别图片</span>
+                  <button class="btn-ghost btn-sm" id="clearDecodeImage">清除</button>
+                </div>
+                <div class="image-preview-box">
+                  <img id="decodePreviewImg" alt="待识别">
+                </div>
+              </div>
+
+              <button class="btn-primary btn-lg" id="decodeBtn">
+                <span id="decodeBtnText">开始识别</span>
+                <span id="decodeSpinner" class="spinner" style="display:none;"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-right">
+          <div class="card sticky">
+            <div class="card-header">
+              <h2>识别结果</h2>
+            </div>
+            <div class="card-body">
+              <div id="decodeResultEmpty" class="result-empty">
+                <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="32" cy="32" r="24"/>
+                  <path d="M24 28 L28 32 L24 36"/>
+                  <path d="M30 40 L40 40"/>
+                </svg>
+                <p>尚未识别</p>
+                <span>上传图片后开始识别条码内容</span>
+              </div>
+
+              <div id="decodeResultContent" style="display:none;">
+                <div class="result-badge" id="resultBadge">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span id="resultBadgeText">识别成功</span>
+                </div>
+
+                <div class="result-field">
+                  <label>识别内容</label>
+                  <div class="result-content-box">
+                    <div class="result-text" id="resultText"></div>
+                    <button class="btn-ghost btn-sm copy-inline" data-target="resultText">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                      复制
+                    </button>
+                  </div>
+                </div>
+
+                <div class="result-info-grid">
+                  <div class="info-item">
+                    <span class="info-label">条码格式</span>
+                    <span class="info-value" id="resultFormat">-</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">处理方式</span>
+                    <span class="info-value" id="resultMethod">-</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">内容长度</span>
+                    <span class="info-value" id="resultLength">-</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">识别时间</span>
+                    <span class="info-value" id="resultTime">-</span>
+                  </div>
+                </div>
+
+                <div class="result-actions">
+                  <button class="btn-secondary" id="openLinkBtn" style="display:none;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    打开链接
+                  </button>
+                  <button class="btn-secondary" id="regenerateBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="1 4 1 10 7 10"/>
+                      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                    </svg>
+                    重新生成
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-batch" class="tab-panel">
+      <div class="panel-split">
+        <div class="panel-left">
+          <div class="card">
+            <div class="card-header">
+              <h2>批量操作</h2>
+              <div class="segmented">
+                <button class="seg-btn active" data-batch-mode="generate">批量生成</button>
+                <button class="seg-btn" data-batch-mode="decode">批量解析</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="batchGeneratePanel">
+                <div class="form-row">
+                  <label>条码内容（每行一个） <span class="required">*</span></label>
+                  <textarea id="batchContent" rows="10" placeholder="https://example.com&#10;产品编号001&#10;Hello World&#10;...&#10;最多支持100条"></textarea>
+                  <div class="hint">已输入 <span id="batchLineCount">0</span> 条</div>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-row">
+                    <label>条码类型</label>
+                    <select id="batchType">
+                      <option value="qrcode">二维码</option>
+                      <option value="code128">Code 128</option>
+                      <option value="code39">Code 39</option>
+                      <option value="ean13">EAN-13</option>
+                    </select>
+                  </div>
+                  <div class="form-row">
+                    <label>尺寸</label>
+                    <input type="number" id="batchSize" value="300" min="50" max="1000">
+                  </div>
+                  <div class="form-row">
+                    <label>纠错等级</label>
+                    <select id="batchError">
+                      <option value="L">L</option>
+                      <option value="M" selected>M</option>
+                      <option value="Q">Q</option>
+                      <option value="H">H</option>
+                    </select>
+                  </div>
+                  <div class="form-row">
+                    <label>边距</label>
+                    <input type="number" id="batchMargin" value="2" min="0" max="20">
+                  </div>
+                </div>
+
+                <button class="btn-primary btn-lg" id="batchGenBtn">
+                  <span>批量生成</span>
+                  <span id="batchGenSpinner" class="spinner" style="display:none;"></span>
+                </button>
+              </div>
+
+              <div id="batchDecodePanel" style="display:none;">
+                <div class="form-row">
+                  <label>上传多张图片（最多50张） <span class="required">*</span></label>
+                  <div class="upload-area upload-area-sm" id="batchDecodeUploader">
+                    <input type="file" id="batchDecodeFiles" accept="image/*" multiple hidden>
+                    <div class="upload-inner">
+                      <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M24 34V14"/>
+                        <polyline points="16 22 24 14 32 22"/>
+                        <rect x="6" y="6" width="36" height="36" rx="4"/>
+                      </svg>
+                      <p>点击或拖拽上传多张图片</p>
+                    </div>
+                  </div>
+                  <div class="file-list" id="batchDecodeFileList"></div>
+                </div>
+                <button class="btn-primary btn-lg" id="batchDecBtn">
+                  <span>批量解析</span>
+                  <span id="batchDecSpinner" class="spinner" style="display:none;"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-right">
+          <div class="card sticky">
+            <div class="card-header">
+              <h2>批量结果</h2>
+              <div class="header-actions">
+                <button class="btn-ghost btn-sm" id="downloadAllZip" style="display:none;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  下载全部
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="batchStats" class="batch-stats" style="display:none;">
+                <div class="stat-item success">
+                  <span class="stat-num" id="statSuccess">0</span>
+                  <span class="stat-label">成功</span>
+                </div>
+                <div class="stat-item fail">
+                  <span class="stat-num" id="statFail">0</span>
+                  <span class="stat-label">失败</span>
+                </div>
+                <div class="stat-item total">
+                  <span class="stat-num" id="statTotal">0</span>
+                  <span class="stat-label">总计</span>
+                </div>
+              </div>
+
+              <div class="batch-grid" id="batchGrid">
+                <div class="result-empty">
+                  <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="6" y="6" width="36" height="36" rx="4"/>
+                    <path d="M6 18 L42 18"/>
+                    <path d="M18 18 L18 42"/>
+                  </svg>
+                  <p>暂无结果</p>
+                  <span>执行批量操作后查看结果</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-history" class="tab-panel">
+      <div class="panel-full">
+        <div class="card">
+          <div class="card-header">
+            <h2>历史记录</h2>
+            <div class="header-actions">
+              <div class="segmented">
+                <button class="seg-btn active" data-history-type="generate">生成记录</button>
+                <button class="seg-btn" data-history-type="decode">解析记录</button>
+              </div>
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="historySearch" placeholder="搜索内容...">
+              </div>
+              <button class="btn-danger btn-sm" id="clearHistoryBtn">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                清空
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="history-table-wrap">
+              <table class="history-table" id="historyTable">
+                <thead>
+                  <tr>
+                    <th>预览</th>
+                    <th>类型</th>
+                    <th>内容</th>
+                    <th>格式/方式</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTbody">
+                </tbody>
+              </table>
+              <div id="historyEmpty" class="result-empty">
+                <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="24" cy="24" r="18"/>
+                  <polyline points="24 14 24 24 32 28"/>
+                </svg>
+                <p>暂无历史记录</p>
+                <span>使用工具后记录将自动保存</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
