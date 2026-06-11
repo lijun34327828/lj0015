@@ -129,7 +129,7 @@ router.post('/barcode', strictLimiter, async (req, res, next) => {
     const {
       type = 'code128',
       content,
-      width = 2,
+      size = 300,
       height = 100,
       bgColor = '#FFFFFF',
       fgColor = '#000000',
@@ -144,20 +144,41 @@ router.post('/barcode', strictLimiter, async (req, res, next) => {
       });
     }
 
-    const options = {
+    const targetWidth = parseInt(size);
+    const targetHeight = parseInt(height);
+    const marginVal = parseInt(margin) || 10;
+
+    const baseOptions = {
       bcid: type,
       text: content,
-      scale: 3,
-      height: parseInt(height) / 72 * 25.4,
+      scale: 1,
+      height: 50,
       includetext: includeText,
       textxalign: 'center',
       backgroundcolor: bgColor,
       barcolor: fgColor,
-      paddingwidth: parseInt(margin) || 10,
+      paddingwidth: marginVal,
       paddingheight: 10
     };
 
-    const png = await bwipjs.toBuffer(options);
+    const basePng = await bwipjs.toBuffer(baseOptions);
+    const baseImg = await Jimp.read(basePng);
+    const baseWidth = baseImg.bitmap.width;
+    const baseHeight = baseImg.bitmap.height;
+
+    const scaleX = targetWidth / baseWidth;
+    const scaleY = targetHeight / baseHeight;
+
+    const finalOptions = {
+      ...baseOptions,
+      scaleX: scaleX,
+      scaleY: scaleY
+    };
+
+    const png = await bwipjs.toBuffer(finalOptions);
+    const finalImg = await Jimp.read(png);
+    const actualWidth = finalImg.bitmap.width;
+    const actualHeight = finalImg.bitmap.height;
 
     const fileName = `bar_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`;
     const filePath = path.join(TEMP_DIR, fileName);
@@ -166,8 +187,9 @@ router.post('/barcode', strictLimiter, async (req, res, next) => {
     const record = storage.addRecord('generate', {
       type,
       content: content.substring(0, 200),
-      width: parseInt(width),
-      height: parseInt(height),
+      size: actualWidth,
+      width: actualWidth,
+      height: actualHeight,
       bgColor,
       fgColor,
       includeText,
@@ -180,7 +202,9 @@ router.post('/barcode', strictLimiter, async (req, res, next) => {
         image: `data:image/png;base64,${png.toString('base64')}`,
         url: `/temp/${fileName}`,
         fileName,
-        id: record.id
+        id: record.id,
+        width: actualWidth,
+        height: actualHeight
       }
     });
   } catch (e) {

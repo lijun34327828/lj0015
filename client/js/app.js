@@ -216,7 +216,13 @@ $('#generateBtn').addEventListener('click', async () => {
     $('#infoContent').textContent = payload.content.length > 60 ? payload.content.substring(0, 60) + '...' : payload.content;
     $('#infoContent').title = payload.content;
     $('#infoType').textContent = typeLabel;
-    $('#infoSize').textContent = `${payload.size}px`;
+    if (state.codeType === 'qrcode') {
+      $('#infoSize').textContent = `${payload.size}px`;
+    } else {
+      const w = data.data.width || payload.size;
+      const h = data.data.height || payload.height;
+      $('#infoSize').textContent = `${w} × ${h} px`;
+    }
     $('#infoTime').textContent = formatTime(Date.now());
 
     showToast('生成成功', 'success');

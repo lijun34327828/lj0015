@@ -71,17 +71,35 @@ router.post('/generate', batchLimiter, async (req, res, next) => {
             color: { dark: fgColor, light: bgColor }
           });
         } else {
-          buffer = await bwipjs.toBuffer({
+          const targetWidth = parseInt(size);
+          const targetHeight = parseInt(height);
+          const marginVal = parseInt(margin) || 10;
+
+          const baseOptions = {
             bcid: type,
             text: content,
-            scale: 3,
-            height: parseInt(height) / 72 * 25.4,
+            scale: 1,
+            height: 50,
             includetext: true,
             textxalign: 'center',
             backgroundcolor: bgColor,
             barcolor: fgColor,
-            paddingwidth: parseInt(margin) || 10,
+            paddingwidth: marginVal,
             paddingheight: 10
+          };
+
+          const basePng = await bwipjs.toBuffer(baseOptions);
+          const baseImg = await Jimp.read(basePng);
+          const baseWidth = baseImg.bitmap.width;
+          const baseHeight = baseImg.bitmap.height;
+
+          const scaleX = targetWidth / baseWidth;
+          const scaleY = targetHeight / baseHeight;
+
+          buffer = await bwipjs.toBuffer({
+            ...baseOptions,
+            scaleX: scaleX,
+            scaleY: scaleY
           });
         }
 
