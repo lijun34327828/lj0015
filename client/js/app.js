@@ -616,15 +616,25 @@ $$('.seg-btn[data-history-type]').forEach(btn => {
     $$('.seg-btn[data-history-type]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.historyType = btn.dataset.historyType;
-    loadHistory();
+    triggerHistoryLoad();
   });
 });
+
+$('#historyCodeType').addEventListener('change', triggerHistoryLoad);
+$('#historyTimeRange').addEventListener('change', triggerHistoryLoad);
 
 let historySearchTimer = null;
 $('#historySearch').addEventListener('input', e => {
   clearTimeout(historySearchTimer);
-  historySearchTimer = setTimeout(() => loadHistory(e.target.value.trim()), 300);
+  historySearchTimer = setTimeout(triggerHistoryLoad, 300);
 });
+
+function triggerHistoryLoad() {
+  const keyword = $('#historySearch').value.trim();
+  const codeType = $('#historyCodeType').value;
+  const timeRange = $('#historyTimeRange').value;
+  loadHistory({ keyword, codeType, timeRange });
+}
 
 $('#clearHistoryBtn').addEventListener('click', async () => {
   if (!confirm(`确定清空全部${state.historyType === 'generate' ? '生成' : '解析'}记录？`)) return;
@@ -633,21 +643,37 @@ $('#clearHistoryBtn').addEventListener('click', async () => {
     const data = await res.json();
     if (data.success) {
       showToast('已清空', 'success');
-      loadHistory();
+      triggerHistoryLoad();
     }
   } catch (e) {
     showToast('操作失败', 'error');
   }
 });
 
-async function loadHistory(keyword = '') {
+function getHistImageUrl(r) {
+  if (!r.fileName) return null;
+  return r.permanent ? `/permanent/${r.fileName}` : `/temp/${r.fileName}`;
+}
+
+async function loadHistory(filters = {}) {
   try {
-    const params = keyword ? `?keyword=${encodeURIComponent(keyword)}` : '';
-    const res = await fetch(`${API}/history/${state.historyType}${params}`);
+    const { keyword, codeType, timeRange } = filters;
+    const queryParams = new URLSearchParams();
+    if (keyword) queryParams.set('keyword', keyword);
+    if (codeType) queryParams.set('codeType', codeType);
+    if (timeRange) queryParams.set('timeRange', timeRange);
+    const qs = queryParams.toString();
+    const url = `${API}/history/${state.historyType}${qs ? '?' + qs : ''}`;
+
+    const res = await fetch(url);
     const data = await res.json();
     if (!data.success) return;
 
     const records = data.data;
+    const count = typeof data.total === 'number' ? data.total : records.length;
+    const badge = $('#historyCountBadge');
+    if (badge) badge.textContent = `共 ${count} 条`;
+
     const tbody = $('#historyTbody');
     const empty = $('#historyEmpty');
     const table = $('#historyTable');
@@ -661,24 +687,40 @@ async function loadHistory(keyword = '') {
     table.style.display = 'table';
     empty.style.display = 'none';
 
-    tbody.innerHTML = records.map(r => {
-      const thumb = state.historyType === 'generate' && r.fileName
-        ? `<div class="hist-thumb"><img src="/temp/${r.fileName}" alt=""></div>`
-        : r.success && r.fileName
-          ? `<div class="hist-thumb"><img src="/temp/${r.fileName}" alt=""></div>`
-          : `<div class="hist-thumb" style="background:var(--bg-tertiary);color:var(--text-muted);font-size:11px;">无图</div>`;
+    tbody.innerHTML = records.map((r, idx) => {
+      const imgUrl = state.historyType === 'generate' || r.success
+        ? getHistImageUrl(r)
+        : null;
 
-      const content = state.historyType === 'generate' ? r.content : (r.success ? r.content : '未识别');
+      let thumb;
+      if (imgUrl) {
+        thumb = `<div class="hist-thumb"><img 
+          src="${imgUrl}" 
+          alt=""
+          data-record-id="${r.id}"
+          data-index="${idx}"
+          onerror="window.__handleHistImgError(this, '${r.id}')"></div>`;
+      } else {
+        thumb = `<div class="hist-thumb" style="background:var(--bg-tertiary);color:var(--text-muted);font-size:11px;">无图</div>`;
+      }
+
+      const rawContent = r.fullContent || r.content || '';
+      const content = state.historyType === 'generate' ? rawContent : (r.success ? rawContent : '未识别');
       const typeOrFormat = state.historyType === 'generate'
         ? r.type
         : (r.success ? r.format : '失败');
       const extra = state.historyType === 'generate'
-        ? `${r.size || ''}px`
+        ? r.type === 'qrcode'
+          ? `${r.size || ''}px / ${r.errorLevel || 'M'}`
+          : `${r.size || ''}px × ${r.height || ''}px`
         : (r.success ? r.method : '');
 
       const actions = [];
       if (r.fileName) {
-        actions.push(`<button class="btn-ghost btn-sm" onclick="window.__downloadHist('/temp/${r.fileName}', '${r.fileName}')">下载</button>`);
+        actions.push(`<button class="btn-ghost btn-sm" onclick="window.__downloadHist('${r.id}')">下载</button>`);
+      }
+      if (state.historyType === 'generate' && r.success !== false) {
+        actions.push(`<button class="btn-ghost btn-sm" onclick='window.__regenFromHist(${JSON.stringify(JSON.stringify(r))})'>重新生成</button>`);
       }
       if (content && r.success !== false) {
         actions.push(`<button class="btn-ghost btn-sm" onclick='copyText(${JSON.stringify(String(content))})'>复制</button>`);
@@ -689,7 +731,7 @@ async function loadHistory(keyword = '') {
         <tr>
           <td>${thumb}</td>
           <td><span class="hist-type">${typeOrFormat}</span></td>
-          <td><div class="hist-content" title="${content}">${content || '-'}</div></td>
+          <td><div class="hist-content" title="${escapeAttr(content)}">${escapeHtml(content) || '-'}</div></td>
           <td>${extra || '-'}</td>
           <td>${formatTime(r.timestamp)}</td>
           <td><div class="hist-actions">${actions.join('')}</div></td>
@@ -700,8 +742,135 @@ async function loadHistory(keyword = '') {
   }
 }
 
-window.__downloadHist = function (url, name) {
-  downloadImage(url, name);
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
+function escapeAttr(s) { return escapeHtml(s).replace(/\n/g, '&#10;'); }
+
+window.__handleHistImgError = async function (imgEl, recordId) {
+  if (imgEl.dataset.retrying === '1') return;
+  imgEl.dataset.retrying = '1';
+
+  try {
+    const res = await fetch(`${API}/history/regenerate/${recordId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success && data.data) {
+      imgEl.src = data.data.url;
+      imgEl.onerror = null;
+    } else {
+      replaceThumbWithPlaceholder(imgEl);
+    }
+  } catch (e) {
+    replaceThumbWithPlaceholder(imgEl);
+  }
+};
+
+function replaceThumbWithPlaceholder(imgEl) {
+  const div = document.createElement('div');
+  div.className = 'hist-thumb';
+  div.style.cssText = 'background:var(--bg-tertiary);color:var(--text-muted);font-size:11px;';
+  div.textContent = '无图';
+  imgEl.parentNode.replaceChild(div, imgEl);
+}
+
+window.__downloadHist = async function (id) {
+  try {
+    const res = await fetch(`${API}/history/${state.historyType}/${id}`);
+    const data = await res.json();
+    const r = data.data;
+    if (!r || !r.fileName) { showToast('文件不存在', 'error'); return; }
+    const url = r.permanent ? `/permanent/${r.fileName}` : `/temp/${r.fileName}`;
+    try {
+      const test = await fetch(url, { method: 'HEAD' });
+      if (!test.ok) throw new Error('missing');
+      downloadImage(url, r.fileName);
+    } catch (_) {
+      const regenRes = await fetch(`${API}/history/regenerate/${id}`, { method: 'POST' });
+      const rd = await regenRes.json();
+      if (rd.success) {
+        downloadImage(rd.data.image, r.fileName || `barcode_${Date.now()}.png`);
+      } else {
+        showToast('图片已过期，无法下载', 'error');
+      }
+    }
+  } catch (e) {
+    showToast('下载失败', 'error');
+  }
+};
+
+window.__regenFromHist = function (recordJson) {
+  try {
+    const r = typeof recordJson === 'string' ? JSON.parse(recordJson) : recordJson;
+    const content = r.fullContent || r.content || '';
+
+    $$('.tab').forEach(t => t.classList.remove('active'));
+    $$('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('.tab[data-tab="generate"]').classList.add('active');
+    $('#tab-generate').classList.add('active');
+
+    const isQR = r.type === 'qrcode';
+
+    $$('.type-btn').forEach(b => b.classList.remove('active'));
+    const targetBtn = document.querySelector(`.type-btn[data-code-type="${isQR ? 'qrcode' : 'barcode'}"]`);
+    if (targetBtn) targetBtn.classList.add('active');
+    state.codeType = isQR ? 'qrcode' : 'barcode';
+
+    $('#barcode-type-select').style.display = isQR ? 'none' : 'block';
+    $('#heightRow').style.display = isQR ? 'none' : 'block';
+    $('#logoSection').style.display = isQR ? 'block' : 'none';
+    $('#includeTextRow').style.display = isQR ? 'none' : 'block';
+    $('#errorLabel').textContent = isQR ? '纠错等级' : '条码密度';
+
+    $('#contentInput').value = content;
+    $('#contentCount').textContent = content.length;
+    $('#contentError').textContent = '';
+
+    if (r.size !== undefined && r.size !== null) $('#sizeInput').value = r.size;
+    if (r.height !== undefined && r.height !== null) $('#heightInput').value = r.height;
+    if (r.margin !== undefined && r.margin !== null) $('#marginInput').value = r.margin;
+
+    if (r.errorLevel) $('#errorLevel').value = r.errorLevel;
+
+    if (!isQR && r.type) {
+      $('#barcodeFormat').value = r.type;
+    }
+
+    if (r.bgColor) {
+      $('#bgColor').value = r.bgColor;
+      $('#bgColorText').value = r.bgColor;
+    }
+    if (r.fgColor) {
+      $('#fgColor').value = r.fgColor;
+      $('#fgColorText').value = r.fgColor;
+    }
+
+    $('#includeText').checked = r.includeText !== false;
+
+    state.logoData = null;
+    $('#logoFile').value = '';
+    $('#logoPreview').innerHTML = `
+      <div class="logo-placeholder">
+        <svg viewBox="0 0 48 48" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="8" y="8" width="32" height="32" rx="4"/>
+          <circle cx="18" cy="18" r="4" fill="currentColor" opacity="0.3"/>
+          <path d="M8 34 L18 24 L28 34 L32 30 L40 38"/>
+        </svg>
+        <span>点击上传LOGO图片</span>
+      </div>`;
+    $('#clearLogo').style.display = 'none';
+
+    $('#previewPlaceholder').style.display = 'none';
+    $('#previewImage').style.display = 'none';
+    $('#previewInfo').style.display = 'none';
+
+    showToast(`已还原${isQR ? '二维码' : '条码'}参数，点击生成即可`, 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('参数还原失败', 'error');
+  }
 };
 
 window.__deleteHist = async function (id) {
@@ -710,7 +879,7 @@ window.__deleteHist = async function (id) {
     const data = await res.json();
     if (data.success) {
       showToast('已删除', 'success');
-      loadHistory();
+      triggerHistoryLoad();
     }
   } catch (e) {
     showToast('删除失败', 'error');

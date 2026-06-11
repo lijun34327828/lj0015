@@ -1,6 +1,48 @@
 {
   "generate": [
     {
+      "id": "1781185297826-qqjd40",
+      "timestamp": 1781185297826,
+      "type": "qrcode",
+      "content": "https://test.com/abc123",
+      "fullContent": "https://test.com/abc123",
+      "size": 350,
+      "errorLevel": "Q",
+      "bgColor": "#FFFFFF",
+      "fgColor": "#000000",
+      "margin": 3,
+      "fileName": "qr_1781185297825_eemngd.png",
+      "permanent": true
+    },
+    {
+      "id": "1781182868420-51cprq",
+      "timestamp": 1781182868420,
+      "type": "code128",
+      "content": "11",
+      "size": 50,
+      "width": 50,
+      "height": 161,
+      "bgColor": "#FFFFFF",
+      "fgColor": "#000000",
+      "includeText": true,
+      "fileName": "regen_1781184960522_fd4myl.png",
+      "permanent": true
+    },
+    {
+      "id": "1781182852439-e3wf1t",
+      "timestamp": 1781182852439,
+      "type": "code128",
+      "content": "111111",
+      "size": 288,
+      "width": 288,
+      "height": 609,
+      "bgColor": "#FFFFFF",
+      "fgColor": "#000000",
+      "includeText": true,
+      "fileName": "regen_1781184960576_cfs335.png",
+      "permanent": true
+    },
+    {
       "id": "1781182504496-0mvdnr",
       "timestamp": 1781182504496,
       "type": "code128",
@@ -11,7 +53,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781182504495_th57xt.png"
+      "fileName": "regen_1781184960634_2whnd0.png",
+      "permanent": true
     },
     {
       "id": "1781182504439-yq58yp",
@@ -24,7 +67,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781182502427_1ylnvd.png"
+      "fileName": "regen_1781184960587_5w3gul.png",
+      "permanent": true
     },
     {
       "id": "1781182450330-17yjn7",
@@ -37,7 +81,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781182450329_dhdew9.png"
+      "fileName": "regen_1781184960640_4gn5yt.png",
+      "permanent": true
     },
     {
       "id": "1781182450256-nhv59y",
@@ -50,7 +95,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781182450255_wua85q.png"
+      "fileName": "regen_1781184960632_44g6oe.png",
+      "permanent": true
     },
     {
       "id": "1781181770921-f3do5e",
@@ -62,7 +108,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781181770920_xhzia0.png"
+      "fileName": "regen_1781184960637_pg13xo.png",
+      "permanent": true
     },
     {
       "id": "1781181764387-wi5ecx",
@@ -74,7 +121,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781181764384_apb9ze.png"
+      "fileName": "regen_1781184960717_b9fbjt.png",
+      "permanent": true
     },
     {
       "id": "1781109612248-8mj06r",
@@ -85,7 +133,8 @@
       "errorLevel": "M",
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
-      "fileName": "qr_1781109612247_qndj7m.png"
+      "fileName": "regen_1781184960702_a6xfbs.png",
+      "permanent": true
     },
     {
       "id": "1781109352915-wd1lpb",
@@ -93,7 +142,8 @@
       "type": "qrcode",
       "content": "Hello3",
       "batch": true,
-      "fileName": "batch_1781109352913_2_Hello3.png"
+      "fileName": "regen_1781184960710_qdqu70.png",
+      "permanent": true
     },
     {
       "id": "1781109352905-1dnurp",
@@ -101,7 +151,8 @@
       "type": "qrcode",
       "content": "Hello2",
       "batch": true,
-      "fileName": "batch_1781109352904_1_Hello2.png"
+      "fileName": "regen_1781184960712_b6ruvk.png",
+      "permanent": true
     },
     {
       "id": "1781109352897-fsdff3",
@@ -109,7 +160,8 @@
       "type": "qrcode",
       "content": "Hello1",
       "batch": true,
-      "fileName": "batch_1781109352895_0_Hello1.png"
+      "fileName": "regen_1781184960708_bt122w.png",
+      "permanent": true
     },
     {
       "id": "1781109340391-lfmcgk",
@@ -121,7 +173,8 @@
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
       "includeText": true,
-      "fileName": "bar_1781109340390_yvvtzk.png"
+      "fileName": "regen_1781184960728_tm88hw.png",
+      "permanent": true
     },
     {
       "id": "1781109319954-oe5gcq",
@@ -132,7 +185,8 @@
       "errorLevel": "M",
       "bgColor": "#FFFFFF",
       "fgColor": "#000000",
-      "fileName": "qr_1781109319319_gg2z7e.png"
+      "fileName": "regen_1781184960784_mndx3n.png",
+      "permanent": true
     }
   ],
   "decode": []

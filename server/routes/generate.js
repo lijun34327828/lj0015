@@ -6,9 +6,13 @@ const fs = require('fs');
 const path = require('path');
 const { strict: strictLimiter } = require('../middleware/rateLimiter');
 const storage = require('../utils/storage');
-const { TEMP_DIR } = require('../utils/cleanupTemp');
 
 const router = express.Router();
+
+const PERMANENT_DIR = path.join(__dirname, '..', 'permanent');
+if (!fs.existsSync(PERMANENT_DIR)) {
+  fs.mkdirSync(PERMANENT_DIR, { recursive: true });
+}
 
 const VALID_BARCODE_TYPES = [
   'qrcode', 'code128', 'code39', 'ean13', 'ean8',
@@ -92,24 +96,27 @@ router.post('/qrcode', strictLimiter, async (req, res, next) => {
     }
 
     const fileName = `qr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`;
-    const filePath = path.join(TEMP_DIR, fileName);
+    const filePath = path.join(PERMANENT_DIR, fileName);
     fs.writeFileSync(filePath, buffer);
 
     const record = storage.addRecord('generate', {
       type: 'qrcode',
       content: content.substring(0, 200),
+      fullContent: content,
       size: parseInt(size),
       errorLevel,
       bgColor,
       fgColor,
-      fileName
+      margin: parseInt(margin),
+      fileName,
+      permanent: true
     });
 
     res.json({
       success: true,
       data: {
         image: `data:image/png;base64,${buffer.toString('base64')}`,
-        url: `/temp/${fileName}`,
+        url: `/permanent/${fileName}`,
         fileName,
         id: record.id
       }
@@ -181,26 +188,29 @@ router.post('/barcode', strictLimiter, async (req, res, next) => {
     const actualHeight = finalImg.bitmap.height;
 
     const fileName = `bar_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`;
-    const filePath = path.join(TEMP_DIR, fileName);
+    const filePath = path.join(PERMANENT_DIR, fileName);
     fs.writeFileSync(filePath, png);
 
     const record = storage.addRecord('generate', {
       type,
       content: content.substring(0, 200),
-      size: actualWidth,
+      fullContent: content,
+      size: targetWidth,
       width: actualWidth,
       height: actualHeight,
       bgColor,
       fgColor,
       includeText,
-      fileName
+      margin: marginVal,
+      fileName,
+      permanent: true
     });
 
     res.json({
       success: true,
       data: {
         image: `data:image/png;base64,${png.toString('base64')}`,
-        url: `/temp/${fileName}`,
+        url: `/permanent/${fileName}`,
         fileName,
         id: record.id,
         width: actualWidth,

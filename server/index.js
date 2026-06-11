@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use(express.static(path.join(__dirname, '..', 'client')));
 app.use('/temp', express.static(path.join(__dirname, 'temp')));
+app.use('/permanent', express.static(path.join(__dirname, 'permanent')));
 
 const logger = require('./utils/logger');
 const rateLimiter = require('./middleware/rateLimiter');

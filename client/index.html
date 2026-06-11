@@ -539,11 +539,41 @@
       <div class="panel-full">
         <div class="card">
           <div class="card-header">
-            <h2>历史记录</h2>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <h2>历史记录</h2>
+              <div id="historyCountBadge" class="count-badge">共 0 条</div>
+            </div>
             <div class="header-actions">
               <div class="segmented">
                 <button class="seg-btn active" data-history-type="generate">生成记录</button>
                 <button class="seg-btn" data-history-type="decode">解析记录</button>
+              </div>
+              <div class="filter-select">
+                <label>类型</label>
+                <select id="historyCodeType">
+                  <option value="">全部类型</option>
+                  <option value="qrcode">二维码</option>
+                  <option value="barcode">一维条码</option>
+                  <option value="code128">Code 128</option>
+                  <option value="code39">Code 39</option>
+                  <option value="ean13">EAN-13</option>
+                  <option value="ean8">EAN-8</option>
+                  <option value="upca">UPC-A</option>
+                  <option value="upce">UPC-E</option>
+                  <option value="itf14">ITF-14</option>
+                  <option value="codabar">Codabar</option>
+                  <option value="msi">MSI Plessey</option>
+                  <option value="datamatrix">Data Matrix</option>
+                  <option value="pdf417">PDF417</option>
+                </select>
+              </div>
+              <div class="filter-select">
+                <label>时间</label>
+                <select id="historyTimeRange">
+                  <option value="">全部时间</option>
+                  <option value="today">今天</option>
+                  <option value="7days">近7天</option>
+                </select>
               </div>
               <div class="search-box">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
